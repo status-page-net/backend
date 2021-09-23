@@ -15,8 +15,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\StatusPage.Api\StatusPage.Api.csproj" />
+    <ProjectReference Include="..\StatusPage.BLL\StatusPage.BLL.csproj" />
     <ProjectReference Include="..\StatusPage.Mock\StatusPage.Mock.csproj" />
-    <ProjectReference Include="..\StatusPage\StatusPage.BLL.csproj" />
   </ItemGroup>
 
 </Project>

@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StatusPage.Mock", "StatusPa
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StatusPage.UnitTest", "StatusPage.UnitTest\StatusPage.UnitTest.csproj", "{3ADD3242-D036-4BC4-82BB-86A80138D4D1}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StatusPage.BLL", "StatusPage\StatusPage.BLL.csproj", "{2E9E077E-601F-4C68-861D-6D629B2B6336}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StatusPage.BLL", "StatusPage.BLL\StatusPage.BLL.csproj", "{2E9E077E-601F-4C68-861D-6D629B2B6336}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StatusPage.IntegrationTest", "StatusPage.IntegrationTest\StatusPage.IntegrationTest.csproj", "{1914BA0B-7DBB-4EBA-91A8-BEAECCEB440D}"
 EndProject
