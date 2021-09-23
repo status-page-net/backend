@@ -1,0 +1,24 @@
+name: Build
+
+on:
+  push:
+    branches: [ master ]
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+
+    runs-on: ubuntu-latest
+    env:
+      SERVICE_IMAGE_NAME: ghcr.io/${{ github.repository }}
+      SERVICE_VERSION: 1.0.${{ github.run_number }}
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: build.sh
+      run: >-
+        NUGET_API_KEY=${{ github.token }}
+        NUGET_SOURCE=https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
+        SERVICE_REPOSITORY_URL=https://github.com/${{ github.repository }}
+        bash -x build.sh

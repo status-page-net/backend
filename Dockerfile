@@ -1,0 +1,26 @@
+# Build
+
+FROM mcr.microsoft.com/dotnet/sdk:5.0-alpine AS build
+
+ARG NUGET_API_KEY
+ARG NUGET_SOURCE
+ARG SERVICE_REPOSITORY_URL
+ARG SERVICE_VERSION
+
+COPY ./ /opt/status-page-net/backend/
+WORKDIR /opt/status-page-net/backend/
+
+RUN \
+	NUGET_API_KEY=${NUGET_API_KEY} \
+	NUGET_SOURCE=${NUGET_SOURCE} \
+	SERVICE_REPOSITORY_URL=${SERVICE_REPOSITORY_URL} \
+	SERVICE_VERSION=${SERVICE_VERSION} \
+	sh -x /opt/status-page-net/backend/build-dotnet.sh
+RUN dotnet publish --configuration Release --no-build --output out StatusPage.Mock
+
+# Runtime
+
+FROM mcr.microsoft.com/dotnet/aspnet:5.0-alpine
+
+COPY --from=build /opt/status-page-net/backend/out/ /opt/status-page-net/backend/
+WORKDIR /opt/status-page-net/backend/
