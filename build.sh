@@ -4,8 +4,8 @@ set -u
 # docker build
 
 # Separate quiet pull for clean build logs.
-docker pull --quiet mcr.microsoft.com/dotnet/aspnet:5.0-alpine
-docker pull --quiet mcr.microsoft.com/dotnet/sdk:5.0-alpine
+docker pull --quiet mcr.microsoft.com/dotnet/aspnet:3.1-alpine
+docker pull --quiet mcr.microsoft.com/dotnet/sdk:3.1-alpine
 
 docker build \
 	--network=host \

@@ -1,6 +1,6 @@
 # Build
 
-FROM mcr.microsoft.com/dotnet/sdk:5.0-alpine AS build
+FROM mcr.microsoft.com/dotnet/sdk:3.1-alpine AS build
 
 ARG NUGET_API_KEY
 ARG NUGET_SOURCE
@@ -20,7 +20,7 @@ RUN dotnet publish --configuration Release --no-build --output out StatusPage.Mo
 
 # Runtime
 
-FROM mcr.microsoft.com/dotnet/aspnet:5.0-alpine
+FROM mcr.microsoft.com/dotnet/aspnet:3.1-alpine
 
 COPY --from=build /opt/status-page-net/backend/out/ /opt/status-page-net/backend/
 WORKDIR /opt/status-page-net/backend/
