@@ -11,7 +11,9 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StatusPage.UnitTest", "Stat
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StatusPage.BLL", "StatusPage.BLL\StatusPage.BLL.csproj", "{2E9E077E-601F-4C68-861D-6D629B2B6336}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StatusPage.IntegrationTest", "StatusPage.IntegrationTest\StatusPage.IntegrationTest.csproj", "{1914BA0B-7DBB-4EBA-91A8-BEAECCEB440D}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "StatusPage.IntegrationTest", "StatusPage.IntegrationTest\StatusPage.IntegrationTest.csproj", "{1914BA0B-7DBB-4EBA-91A8-BEAECCEB440D}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "StatusPage.Function", "StatusPage.Function\StatusPage.Function.csproj", "{2186BC0E-1DEC-4746-92F4-5756BCA86786}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -39,6 +41,10 @@ Global
 		{1914BA0B-7DBB-4EBA-91A8-BEAECCEB440D}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{1914BA0B-7DBB-4EBA-91A8-BEAECCEB440D}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{1914BA0B-7DBB-4EBA-91A8-BEAECCEB440D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{2186BC0E-1DEC-4746-92F4-5756BCA86786}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{2186BC0E-1DEC-4746-92F4-5756BCA86786}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{2186BC0E-1DEC-4746-92F4-5756BCA86786}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{2186BC0E-1DEC-4746-92F4-5756BCA86786}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

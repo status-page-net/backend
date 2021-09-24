@@ -10,7 +10,8 @@ namespace StatusPage.Api
 
 		public override bool Equals(object obj)
 		{
-			if (obj is not Service service)
+			Service service = obj as Service;
+			if (service == null)
 			{
 				return false;
 			}

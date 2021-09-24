@@ -8,7 +8,7 @@ namespace StatusPage.Mock
 {
 	public class ServiceDALMock : IServiceDAL
 	{
-		private readonly Dictionary<Guid, Service> _Storage = new();
+		private readonly Dictionary<Guid, Service> _Storage = new Dictionary<Guid, Service>();
 
 		public Task CreateAsync(Service service, CancellationToken ct)
 		{

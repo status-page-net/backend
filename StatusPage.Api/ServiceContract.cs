@@ -33,7 +33,7 @@ namespace StatusPage.Api
 		/// <param name="service"></param>
 		/// <param name="ct">Cancellation token for asynchronous operation.</param>
 		/// <returns>
-		/// <see langword="true"/> if service was updated and <see langword="bool"/> if not exists.
+		/// <see langword="true"/> if service was updated and <see langword="false"/> if not exists.
 		/// </returns>
 		/// <exception cref="InvalidServiceException"></exception>
 		Task<bool> UpdateAsync(Service service, CancellationToken ct);
@@ -44,7 +44,7 @@ namespace StatusPage.Api
 		/// <param name="id">Identifier of the service.</param>
 		/// <param name="ct">Cancellation token for asynchronous operation.</param>
 		/// <returns>
-		/// <see langword="true"/> if service was deleted and <see langword="bool"/> if not exists.
+		/// <see langword="true"/> if service was deleted and <see langword="false"/> if not exists.
 		/// </returns>
 		Task<bool> DeleteAsync(Guid id, CancellationToken ct);
 	}
