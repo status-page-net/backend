@@ -1,7 +1,7 @@
 set -e
 set -u
 
-dotnet restore
+dotnet restore --configfile NuGet.Config
 dotnet build --configuration Release --no-restore /p:Version=${SERVICE_VERSION} /p:RepositoryUrl=${SERVICE_REPOSITORY_URL}
 dotnet test --configuration Release --no-build --verbosity normal
 
