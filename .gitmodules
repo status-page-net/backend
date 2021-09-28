@@ -1,0 +1,3 @@
+[submodule "azure-functions-host"]
+	path = azure-functions-host
+	url = https://github.com/Azure/azure-functions-host.git

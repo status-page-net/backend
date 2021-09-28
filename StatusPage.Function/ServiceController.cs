@@ -20,27 +20,27 @@ namespace StatusPage.Function
 
 		[FunctionName("Service-Create")]
 		public async Task<IActionResult> CreateAsync(
-			[HttpTrigger(AuthorizationLevel.Anonymous, "post", Route = "services")] Service service,
+			[HttpTrigger(AuthorizationLevel.Anonymous, "POST", Route = "services")] Service service,
 			CancellationToken ct)
 		{
 			try
 			{
 				await _serviceBLL.CreateAsync(service, ct);
 			}
-			catch (InvalidServiceException)
+			catch (InvalidServiceException e)
 			{
-				return new BadRequestResult();
+				return new BadRequestObjectResult(e.Message);
 			}
-			catch (ServiceAlreadyExistsException)
+			catch (ServiceAlreadyExistsException e)
 			{
-				return new ConflictResult();
+				return new ConflictObjectResult(e.Message);
 			}
 			return new OkResult();
 		}
 
 		[FunctionName("Service-Get")]
 		public async Task<IActionResult> GetAsync(
-			[HttpTrigger(AuthorizationLevel.Anonymous, "get", Route = "services/{id:Guid}")] HttpRequest request,
+			[HttpTrigger(AuthorizationLevel.Anonymous, "GET", Route = "services/{id:Guid}")] HttpRequest request,
 			Guid id,
 			CancellationToken ct)
 		{
@@ -54,7 +54,7 @@ namespace StatusPage.Function
 
 		[FunctionName("Service-Update")]
 		public async Task<IActionResult> UpdateAsync(
-			[HttpTrigger(AuthorizationLevel.Anonymous, "put", Route = "services")] Service service,
+			[HttpTrigger(AuthorizationLevel.Anonymous, "PUT", Route = "services")] Service service,
 			CancellationToken ct)
 		{
 			try
@@ -65,16 +65,16 @@ namespace StatusPage.Function
 					return new NotFoundResult();
 				}
 			}
-			catch (InvalidServiceException)
+			catch (InvalidServiceException e)
 			{
-				return new BadRequestResult();
+				return new BadRequestObjectResult(e.Message);
 			}
 			return new OkResult();
 		}
 
 		[FunctionName("Service-Delete")]
 		public async Task<IActionResult> DeleteAsync(
-			[HttpTrigger(AuthorizationLevel.Anonymous, "delete", Route = "services/{id:Guid}")] HttpRequest request,
+			[HttpTrigger(AuthorizationLevel.Anonymous, "DELETE", Route = "services/{id:Guid}")] HttpRequest request,
 			Guid id,
 			CancellationToken ct)
 		{

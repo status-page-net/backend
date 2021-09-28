@@ -16,7 +16,7 @@ RUN \
 	SERVICE_REPOSITORY_URL=${SERVICE_REPOSITORY_URL} \
 	SERVICE_VERSION=${SERVICE_VERSION} \
 	sh -x /opt/status-page-net/backend/build-dotnet.sh
-RUN dotnet publish --configuration Release --no-build --output out StatusPage.Mock
+RUN dotnet publish --configuration Release --no-build --output out StatusPage.Function
 
 # Runtime
 

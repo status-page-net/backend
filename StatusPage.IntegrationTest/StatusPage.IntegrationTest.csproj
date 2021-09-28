@@ -1,13 +1,15 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFramework>netcoreapp3.1</TargetFramework>
-
     <IsPackable>false</IsPackable>
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="5.0.2" />
+    <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="3.1.19" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection" Version="3.1.19" />
+    <PackageReference Include="Microsoft.Extensions.DependencyInjection.Abstractions" Version="3.1.19" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="3.1.19" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="16.9.4" />
     <PackageReference Include="MSTest.TestAdapter" Version="2.2.3" />
     <PackageReference Include="MSTest.TestFramework" Version="2.2.3" />
@@ -15,8 +17,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\azure-functions-host\src\WebJobs.Script.WebHost\WebJobs.Script.WebHost.csproj" />
     <ProjectReference Include="..\StatusPage.Api\StatusPage.Api.csproj" />
     <ProjectReference Include="..\StatusPage.BLL\StatusPage.BLL.csproj" />
+    <ProjectReference Include="..\StatusPage.Function\StatusPage.Function.csproj" />
     <ProjectReference Include="..\StatusPage.Mock\StatusPage.Mock.csproj" />
   </ItemGroup>
 
