@@ -4,10 +4,11 @@ set -u
 # docker build
 
 # Separate quiet pull for clean build logs.
-docker pull --quiet mcr.microsoft.com/dotnet/aspnet:3.1-alpine
-docker pull --quiet mcr.microsoft.com/dotnet/sdk:3.1-alpine
+docker pull --quiet mcr.microsoft.com/dotnet/aspnet:3.1
+docker pull --quiet mcr.microsoft.com/dotnet/sdk:3.1
 
-DOCKER_BUILDKIT=1 docker build \
+docker build \
+	--progress=plain \
 	--network=host \
 	--build-arg NUGET_API_KEY=${NUGET_API_KEY} \
 	--build-arg NUGET_SOURCE=${NUGET_SOURCE} \
