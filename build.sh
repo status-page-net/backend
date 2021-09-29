@@ -7,7 +7,7 @@ set -u
 docker pull --quiet mcr.microsoft.com/dotnet/aspnet:3.1-alpine
 docker pull --quiet mcr.microsoft.com/dotnet/sdk:3.1-alpine
 
-docker build \
+DOCKER_BUILDKIT=1 docker build \
 	--network=host \
 	--build-arg NUGET_API_KEY=${NUGET_API_KEY} \
 	--build-arg NUGET_SOURCE=${NUGET_SOURCE} \
