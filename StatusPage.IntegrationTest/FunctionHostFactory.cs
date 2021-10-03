@@ -4,50 +4,49 @@ using Microsoft.Azure.WebJobs.Script;
 using Microsoft.Azure.WebJobs.Script.WebHost;
 using Microsoft.Azure.WebJobs.Script.WebHost.Configuration;
 using Microsoft.Azure.WebJobs.Script.WebHost.DependencyInjection;
-using Microsoft.Azure.WebJobs.Script.WebHost.Diagnostics;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Configuration.EnvironmentVariables;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Logging;
+using StatusPage.BLL;
+using StatusPage.Mock;
 using System;
-using System.IO;
 using System.Linq;
-using System.Reflection;
 
 namespace StatusPage.IntegrationTest
 {
 	public class FunctionHostFactory : WebApplicationFactory<Startup>
 	{
-		private readonly string _root;
-
-		private FunctionHostFactory(string root)
+		private FunctionHostFactory()
 		{
-			_root = root ?? throw new ArgumentNullException(nameof(root));
 		}
 
-		public static FunctionHostFactory Create<T>()
+		public static FunctionHostFactory Create(string root)
 		{
-			Assembly assembly = typeof(T).Assembly;
-			string root = Path.GetDirectoryName(assembly.Location);
-			return new FunctionHostFactory(root);
+			Environment.SetEnvironmentVariable(
+				EnvironmentSettingNames.AzureWebJobsScriptRoot,
+				root);
+			return new FunctionHostFactory();
 		}
 
 		protected override void ConfigureWebHost(IWebHostBuilder builder)
 		{
 			base.ConfigureWebHost(builder);
 
-			builder.ConfigureServices(sc =>
+			builder.ConfigureServices(services =>
 			{
 				var factory = new WebHostServiceProviderFactory();
-				sc.Replace(ServiceDescriptor.Singleton<IServiceProviderFactory<IServiceCollection>>(factory));
+				services.Replace(ServiceDescriptor.Singleton<IServiceProviderFactory<IServiceCollection>>(factory));
+				services.AddStatusPageBLL();
+				services.AddStatusPageDALMock();
 			});
 			builder.ConfigureAppConfiguration((context, config) =>
 			{
-				IConfigurationSource envVarsSource = config.Sources.OfType<EnvironmentVariablesConfigurationSource>().FirstOrDefault();
-				if (envVarsSource != null)
+				IConfigurationSource source = config.Sources.OfType<EnvironmentVariablesConfigurationSource>().FirstOrDefault();
+				if (source != null)
 				{
-					config.Sources.Remove(envVarsSource);
+					config.Sources.Remove(source);
 				}
 
 				config.Add(new ScriptEnvironmentVariablesConfigurationSource());
@@ -59,12 +58,9 @@ namespace StatusPage.IntegrationTest
 					IsLinuxAppServiceEnvironment = SystemEnvironment.Instance.IsLinuxAppService()
 				});
 			});
-			builder.ConfigureLogging((context, loggingBuilder) =>
+			builder.ConfigureLogging((context, builder) =>
 			{
-				loggingBuilder.ClearProviders();
-
-				loggingBuilder.AddDefaultWebJobsFilters();
-				loggingBuilder.AddWebJobsSystem<WebHostSystemLoggerProvider>();
+				builder.ClearProviders();
 			});
 		}
 	}

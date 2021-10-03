@@ -4,6 +4,7 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using StatusPage.Api;
 using System;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -20,9 +21,11 @@ namespace StatusPage.Function
 
 		[FunctionName("Service-Create")]
 		public async Task<IActionResult> CreateAsync(
-			[HttpTrigger(AuthorizationLevel.Anonymous, "POST", Route = "services")] Service service,
+			[HttpTrigger(AuthorizationLevel.Anonymous, "POST", Route = "services")] HttpRequest request,
 			CancellationToken ct)
 		{
+			var service = await FromJsonAsync<Service>(request, ct);
+
 			try
 			{
 				await _serviceBLL.CreateAsync(service, ct);
@@ -54,9 +57,11 @@ namespace StatusPage.Function
 
 		[FunctionName("Service-Update")]
 		public async Task<IActionResult> UpdateAsync(
-			[HttpTrigger(AuthorizationLevel.Anonymous, "PUT", Route = "services")] Service service,
+			[HttpTrigger(AuthorizationLevel.Anonymous, "PUT", Route = "services")] HttpRequest request,
 			CancellationToken ct)
 		{
+			var service = await FromJsonAsync<Service>(request, ct);
+
 			try
 			{
 				bool exists = await _serviceBLL.UpdateAsync(service, ct);
@@ -84,6 +89,15 @@ namespace StatusPage.Function
 				return new NotFoundResult();
 			}
 			return new OkResult();
+		}
+
+		private static async Task<T> FromJsonAsync<T>(HttpRequest request, CancellationToken ct)
+		{
+			var options = new JsonSerializerOptions
+			{
+				PropertyNameCaseInsensitive = true
+			};
+			return await JsonSerializer.DeserializeAsync<T>(request.Body, options, ct);
 		}
 	}
 }
