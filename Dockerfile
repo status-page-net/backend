@@ -11,16 +11,19 @@ COPY ./ /opt/status-page-net/backend/
 WORKDIR /opt/status-page-net/backend/
 
 RUN \
-	NUGET_API_KEY=${NUGET_API_KEY} \
-	NUGET_SOURCE=${NUGET_SOURCE} \
+	SERVICE_CONFIGURATION=Release \
 	SERVICE_REPOSITORY_URL=${SERVICE_REPOSITORY_URL} \
 	SERVICE_VERSION=${SERVICE_VERSION} \
 	sh -x /opt/status-page-net/backend/build-dotnet.sh
-RUN dotnet publish --configuration Release --no-build --output out StatusPage.Function
+
+RUN \
+	NUGET_API_KEY=${NUGET_API_KEY} \
+	NUGET_SOURCE=${NUGET_SOURCE} \
+	sh -x /opt/status-page-net/backend/build-push.sh
 
 # Runtime
 
-FROM mcr.microsoft.com/dotnet/aspnet:3.1
+# FROM mcr.microsoft.com/dotnet/aspnet:3.1
 
-COPY --from=build /opt/status-page-net/backend/out/ /opt/status-page-net/backend/
-WORKDIR /opt/status-page-net/backend/
+# COPY --from=build /opt/status-page-net/backend/out/ /opt/status-page-net/backend/
+# WORKDIR /opt/status-page-net/backend/
