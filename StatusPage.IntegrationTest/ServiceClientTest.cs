@@ -12,7 +12,7 @@ namespace StatusPage.IntegrationTest
 	[TestClass]
 	public class ServiceClientTest : ServiceTestBase
 	{
-		private static IServiceProvider _ServiceProvider;
+		private static ServiceProvider _ServiceProvider;
 		private static FunctionHostFactory _Host;
 
 		protected override IServiceProvider ServiceProvider => _ServiceProvider;
@@ -20,22 +20,24 @@ namespace StatusPage.IntegrationTest
 		[ClassInitialize]
 		public static void Init(TestContext context)
 		{
+			IServiceCollection services = new ServiceCollection();
+
 			string root = DetectScriptRoot();
 			_Host = FunctionHostFactory.Create(root);
-			IServiceCollection services = new ServiceCollection();
-			services.AddSingleton<IServiceBLL>(sp =>
-			{
-				HttpClient client = _Host.CreateClient();
-				return new ServiceClient(client);
-			});
+			HttpClient client = _Host.CreateClient();
+			services.AddServiceClient(client);
+
 			_ServiceProvider = services.BuildServiceProvider();
 		}
 
 		[ClassCleanup]
 		public static void Cleanup()
 		{
-			_ServiceProvider = null;
+			_Host.Dispose();
 			_Host = null;
+
+			_ServiceProvider.Dispose();
+			_ServiceProvider = null;
 		}
 
 		private static string DetectScriptRoot()
