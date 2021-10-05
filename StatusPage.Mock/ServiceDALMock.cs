@@ -1,6 +1,6 @@
 ﻿using StatusPage.Api;
 using System;
-using System.Collections.Generic;
+using System.Collections.Concurrent;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -8,32 +8,22 @@ namespace StatusPage.Mock
 {
 	public class ServiceDALMock : IServiceDAL
 	{
-		private readonly Dictionary<Guid, Service> _Storage = new Dictionary<Guid, Service>();
+		private readonly ConcurrentDictionary<Guid, Service> _storage = new ConcurrentDictionary<Guid, Service>();
 
 		public Task CreateAsync(Service service, CancellationToken ct)
 		{
 			Service.Validate(service);
-			try
+
+			if (!_storage.TryAdd(service.Id, service.Clone()))
 			{
-				lock (_Storage)
-				{
-					_Storage.Add(service.Id, service.Clone());
-				}
-			}
-			catch (ArgumentException e)
-			{
-				throw new ServiceAlreadyExistsException(service.Id, e);
+				throw new ServiceAlreadyExistsException(service.Id, null);
 			}
 			return Task.CompletedTask;
 		}
 
 		public Task<Service> GetAsync(Guid id, CancellationToken ct)
 		{
-			Service service;
-			lock (_Storage)
-			{
-				_Storage.TryGetValue(id, out service);
-			}
+			_storage.TryGetValue(id, out Service service);
 			return Task.FromResult(service?.Clone());
 		}
 
@@ -41,25 +31,18 @@ namespace StatusPage.Mock
 		{
 			Service.Validate(service);
 
-			bool exists = false;
-			lock (_Storage)
+			bool exists = _storage.TryGetValue(service.Id, out Service current);
+			if (!exists)
 			{
-				if (_Storage.ContainsKey(service.Id))
-				{
-					_Storage[service.Id] = service.Clone();
-					exists = true;
-				}
+				return Task.FromResult(exists);
 			}
+			exists = _storage.TryUpdate(service.Id, service, current);
 			return Task.FromResult(exists);
 		}
 
 		public Task<bool> DeleteAsync(Guid id, CancellationToken ct)
 		{
-			bool exists = false;
-			lock (_Storage)
-			{
-				exists = _Storage.Remove(id);
-			}
+			bool exists = _storage.TryRemove(id, out _);
 			return Task.FromResult(exists);
 		}
 	}
