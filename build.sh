@@ -1,10 +1,25 @@
 set -e
 set -u
 
+# MongoDB
+
+MONGODB_VERSION=5.0.3-focal
+
+# Separate quiet pull for clean build logs.
+docker pull --quiet mongo:${MONGODB_VERSION}
+
+docker run \
+	--name=mongodb \
+	-d --rm \
+	--network=host \
+	--log-driver=syslog \
+	--log-opt tag=mongodb \
+	mongo:${MONGODB_VERSION}
+
 # docker build
 
 # Separate quiet pull for clean build logs.
-docker pull --quiet mcr.microsoft.com/dotnet/aspnet:3.1
+# docker pull --quiet mcr.microsoft.com/dotnet/aspnet:3.1
 docker pull --quiet mcr.microsoft.com/dotnet/sdk:3.1
 
 docker build \

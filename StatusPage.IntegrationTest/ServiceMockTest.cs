@@ -7,7 +7,7 @@ using System;
 namespace StatusPage.IntegrationTest
 {
 	[TestClass]
-	public class ServiceDALMockTest : ServiceTestBase
+	public class ServiceMockTest : ServiceTestBase
 	{
 		private static IServiceProvider _ServiceProvider;
 

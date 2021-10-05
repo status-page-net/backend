@@ -22,6 +22,7 @@
     <ProjectReference Include="..\StatusPage.BLL\StatusPage.BLL.csproj" />
     <ProjectReference Include="..\StatusPage.Client\StatusPage.Client.csproj" />
     <ProjectReference Include="..\StatusPage.Mock\StatusPage.Mock.csproj" />
+    <ProjectReference Include="..\StatusPage.MongoDB\StatusPage.MongoDB.csproj" />
   </ItemGroup>
 
 </Project>
