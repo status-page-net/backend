@@ -17,7 +17,7 @@ namespace StatusPage.Client
 			_client = client ?? throw new ArgumentNullException(nameof(client));
 		}
 
-		public async Task CreateAsync(Service service, CancellationToken ct)
+		public async Task<Service> CreateAsync(Service service, CancellationToken ct)
 		{
 			using HttpResponseMessage response = await _client.PostAsJsonAsync("api/services", service, ct);
 			if (response.StatusCode == HttpStatusCode.BadRequest)
@@ -30,6 +30,7 @@ namespace StatusPage.Client
 				throw new ServiceAlreadyExistsException(service.Id, null);
 			}
 			response.EnsureSuccessStatusCode();
+			return await response.Content.ReadFromJsonAsync<Service>(null, ct);
 		}
 
 		public async Task<Service> GetAsync(Guid id, CancellationToken ct)
@@ -43,7 +44,7 @@ namespace StatusPage.Client
 			return await response.Content.ReadFromJsonAsync<Service>(null, ct);
 		}
 
-		public async Task<bool> UpdateAsync(Service service, CancellationToken ct)
+		public async Task<Service> UpdateAsync(Service service, CancellationToken ct)
 		{
 			using HttpResponseMessage response = await _client.PutAsJsonAsync("api/services", service, ct);
 			if (response.StatusCode == HttpStatusCode.BadRequest)
@@ -53,10 +54,15 @@ namespace StatusPage.Client
 			}
 			if (response.StatusCode == HttpStatusCode.NotFound)
 			{
-				return false;
+				return null;
+			}
+			if (response.StatusCode == HttpStatusCode.PreconditionFailed)
+			{
+				Service latest = await response.Content.ReadFromJsonAsync<Service>(null, ct);
+				throw new OutdatedServiceException(latest);
 			}
 			response.EnsureSuccessStatusCode();
-			return true;
+			return await response.Content.ReadFromJsonAsync<Service>(null, ct);
 		}
 
 		public async Task<bool> DeleteAsync(Guid id, CancellationToken ct)

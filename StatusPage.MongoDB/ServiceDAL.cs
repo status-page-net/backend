@@ -17,17 +17,20 @@ namespace StatusPage.MongoDB
 
 		private IMongoCollection<Service> Collection => _database.GetCollection<Service>(nameof(Service));
 
-		public async Task CreateAsync(Service service, CancellationToken ct)
+		public async Task<Service> CreateAsync(Service service, CancellationToken ct)
 		{
 			Service.Validate(service);
+
+			Service clone = service.Clone(refreshETag: true);
 			try
 			{
-				await Collection.InsertOneAsync(service, null, ct);
+				await Collection.InsertOneAsync(clone, null, ct);
 			}
 			catch (MongoWriteException e) when (e.WriteError.Category == ServerErrorCategory.DuplicateKey)
 			{
 				throw new ServiceAlreadyExistsException(service.Id, e);
 			}
+			return clone;
 		}
 
 		public async Task<Service> GetAsync(Guid id, CancellationToken ct)
@@ -51,19 +54,30 @@ namespace StatusPage.MongoDB
 			return null;
 		}
 
-		public async Task<bool> UpdateAsync(Service service, CancellationToken ct)
+		public async Task<Service> UpdateAsync(Service service, CancellationToken ct)
 		{
 			Service.Validate(service);
+
+			Service clone = service.Clone(refreshETag: true);
 			Service before = await Collection.FindOneAndReplaceAsync<Service>(
-				s => s.Id == service.Id,
-				service,
+				s => (s.Id == service.Id) && (s.ETag == service.ETag),
+				clone,
 				new FindOneAndReplaceOptions<Service>
 				{
 					IsUpsert = false,
 					ReturnDocument = ReturnDocument.Before
 				},
 				ct);
-			return (before != null);
+			if (before == null)
+			{
+				Service current = await GetAsync(service.Id, ct);
+				if (current == null)
+				{
+					return null;
+				}
+				throw new OutdatedServiceException(current);
+			}
+			return clone;
 		}
 
 		public async Task<bool> DeleteAsync(Guid id, CancellationToken ct)

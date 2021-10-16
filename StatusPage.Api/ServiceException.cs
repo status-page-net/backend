@@ -10,6 +10,17 @@ namespace StatusPage.Api
 		}
 	}
 
+	public class OutdatedServiceException : ArgumentException
+	{
+		public readonly Service Latest;
+
+		public OutdatedServiceException(Service latest) :
+			base($"Service is outdated", (Exception)null)
+		{
+			Latest = latest ?? throw new ArgumentNullException(nameof(latest));
+		}
+	}
+
 	public class ServiceAlreadyExistsException : ArgumentException
 	{
 		public ServiceAlreadyExistsException(Guid id, Exception inner) :

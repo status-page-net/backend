@@ -11,7 +11,7 @@ namespace StatusPage.IntegrationTest
 	public class ServiceMongoDBTest : ServiceTestBase
 	{
 		private static ServiceProvider _ServiceProvider;
-		private static readonly string _DBName = "StatusPage_" + Guid.NewGuid().ToString();
+		private static readonly string _DBName = "StatusPage_" + Guid.NewGuid().ToString("N");
 
 		protected override IServiceProvider ServiceProvider => _ServiceProvider;
 

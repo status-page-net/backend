@@ -14,11 +14,11 @@ namespace StatusPage.BLL
 			_serviceDAL = serviceDAL ?? throw new ArgumentNullException(nameof(serviceDAL));
 		}
 
-		public async Task CreateAsync(Service service, CancellationToken ct)
+		public async Task<Service> CreateAsync(Service service, CancellationToken ct)
 		{
 			Service.Validate(service);
 
-			await _serviceDAL.CreateAsync(service, ct);
+			return await _serviceDAL.CreateAsync(service, ct);
 		}
 
 		public async Task<Service> GetAsync(Guid id, CancellationToken ct)
@@ -26,7 +26,7 @@ namespace StatusPage.BLL
 			return await _serviceDAL.GetAsync(id, ct);
 		}
 
-		public async Task<bool> UpdateAsync(Service service, CancellationToken ct)
+		public async Task<Service> UpdateAsync(Service service, CancellationToken ct)
 		{
 			Service.Validate(service);
 

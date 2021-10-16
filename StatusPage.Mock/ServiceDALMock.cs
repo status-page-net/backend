@@ -10,34 +10,44 @@ namespace StatusPage.Mock
 	{
 		private readonly ConcurrentDictionary<Guid, Service> _storage = new ConcurrentDictionary<Guid, Service>();
 
-		public Task CreateAsync(Service service, CancellationToken ct)
+		public Task<Service> CreateAsync(Service service, CancellationToken ct)
 		{
 			Service.Validate(service);
 
-			if (!_storage.TryAdd(service.Id, service.Clone()))
+			Service clone = service.Clone(refreshETag: true);
+			if (!_storage.TryAdd(service.Id, clone))
 			{
 				throw new ServiceAlreadyExistsException(service.Id, null);
 			}
-			return Task.CompletedTask;
+			return Task.FromResult(clone);
 		}
 
 		public Task<Service> GetAsync(Guid id, CancellationToken ct)
 		{
 			_storage.TryGetValue(id, out Service service);
-			return Task.FromResult(service?.Clone());
+			return Task.FromResult(service?.Clone(refreshETag: false));
 		}
 
-		public Task<bool> UpdateAsync(Service service, CancellationToken ct)
+		public Task<Service> UpdateAsync(Service service, CancellationToken ct)
 		{
 			Service.Validate(service);
 
 			bool exists = _storage.TryGetValue(service.Id, out Service current);
 			if (!exists)
 			{
-				return Task.FromResult(exists);
+				return Task.FromResult<Service>(null);
 			}
-			exists = _storage.TryUpdate(service.Id, service, current);
-			return Task.FromResult(exists);
+			if (service.ETag != current.ETag)
+			{
+				throw new OutdatedServiceException(current);
+			}
+			Service clone = service.Clone(refreshETag: true);
+			exists = _storage.TryUpdate(service.Id, clone, current);
+			if (!exists)
+			{
+				throw new OutdatedServiceException(current);
+			}
+			return Task.FromResult(clone);
 		}
 
 		public Task<bool> DeleteAsync(Guid id, CancellationToken ct)

@@ -45,16 +45,6 @@ namespace StatusPage.UnitTest
 		}
 
 		[TestMethod]
-		public async Task Create_Ok()
-		{
-			await RunAsync(async (serviceBLL, mock, ct) =>
-			{
-				Service service = CreateDefaultService();
-				await serviceBLL.CreateAsync(service, ct);
-			});
-		}
-
-		[TestMethod]
 		public async Task Create_Fail_ServiceIsNull()
 		{
 			await RunAsync(async (serviceBLL, mock, ct) =>
@@ -66,75 +56,6 @@ namespace StatusPage.UnitTest
 		}
 
 		[TestMethod]
-		public async Task Create_Fail_AlreadyExists()
-		{
-			await RunAsync(async (serviceBLL, mock, ct) =>
-			{
-				Service service = CreateDefaultService();
-				await serviceBLL.CreateAsync(service, ct);
-
-				async Task action() => await serviceBLL.CreateAsync(service, ct);
-
-				await Assert.ThrowsExceptionAsync<ServiceAlreadyExistsException>(action);
-			});
-		}
-
-		[TestMethod]
-		public async Task Get_Ok()
-		{
-			await RunAsync(async (serviceBLL, mock, ct) =>
-			{
-				Service service1 = CreateDefaultService();
-				await serviceBLL.CreateAsync(service1, ct);
-
-				Service service2 = await serviceBLL.GetAsync(service1.Id, ct);
-
-				Assert.AreEqual(service1, service2);
-			});
-		}
-
-		[TestMethod]
-		public async Task Get_Ok_NotFound()
-		{
-			await RunAsync(async (serviceBLL, mock, ct) =>
-			{
-				Service service = await serviceBLL.GetAsync(Guid.NewGuid(), ct);
-				Assert.IsNull(service);
-			});
-		}
-
-		[TestMethod]
-		public async Task Update_Ok()
-		{
-			await RunAsync(async (serviceBLL, mock, ct) =>
-			{
-				Service service1 = CreateDefaultService();
-				await serviceBLL.CreateAsync(service1, ct);
-				service1.Title += ".Updated";
-
-				bool exists = await serviceBLL.UpdateAsync(service1, ct);
-				Assert.IsTrue(exists);
-
-				Service service2 = await serviceBLL.GetAsync(service1.Id, ct);
-				Assert.AreEqual(service1, service2);
-			});
-		}
-
-		[TestMethod]
-		public async Task Update_Ok_NotFound()
-		{
-			await RunAsync(async (serviceBLL, mock, ct) =>
-			{
-				Service service1 = CreateDefaultService();
-				bool exists = await serviceBLL.UpdateAsync(service1, ct);
-				Assert.IsFalse(exists);
-
-				Service service2 = await serviceBLL.GetAsync(service1.Id, ct);
-				Assert.IsNull(service2);
-			});
-		}
-
-		[TestMethod]
 		public async Task Update_Fail_ServiceIsNull()
 		{
 			await RunAsync(async (serviceBLL, mock, ct) =>
@@ -142,33 +63,6 @@ namespace StatusPage.UnitTest
 				async Task action() => await serviceBLL.UpdateAsync(null, ct);
 
 				await Assert.ThrowsExceptionAsync<InvalidServiceException>(action);
-			});
-		}
-
-		[TestMethod]
-		public async Task Delete_Ok()
-		{
-			await RunAsync(async (serviceBLL, mock, ct) =>
-			{
-				Service service1 = CreateDefaultService();
-				await serviceBLL.CreateAsync(service1, ct);
-
-				bool exists = await serviceBLL.DeleteAsync(service1.Id, ct);
-				Assert.IsTrue(exists);
-
-				Service service2 = await serviceBLL.GetAsync(service1.Id, ct);
-				Assert.IsNull(service2);
-			});
-		}
-
-		[TestMethod]
-		public async Task Delete_Ok_NotFound()
-		{
-			await RunAsync(async (serviceBLL, mock, ct) =>
-			{
-				Service service = CreateDefaultService();
-				bool exists = await serviceBLL.DeleteAsync(service.Id, ct);
-				Assert.IsFalse(exists);
 			});
 		}
 

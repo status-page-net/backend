@@ -4,6 +4,7 @@ using Microsoft.Azure.WebJobs;
 using Microsoft.Azure.WebJobs.Extensions.Http;
 using StatusPage.Api;
 using System;
+using System.Net;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
@@ -28,7 +29,8 @@ namespace StatusPage.Function
 
 			try
 			{
-				await _serviceBLL.CreateAsync(service, ct);
+				Service created = await _serviceBLL.CreateAsync(service, ct);
+				return new OkObjectResult(created);
 			}
 			catch (InvalidServiceException e)
 			{
@@ -38,7 +40,6 @@ namespace StatusPage.Function
 			{
 				return new ConflictObjectResult(e.Message);
 			}
-			return new OkResult();
 		}
 
 		[FunctionName("Service-Get")]
@@ -64,17 +65,24 @@ namespace StatusPage.Function
 
 			try
 			{
-				bool exists = await _serviceBLL.UpdateAsync(service, ct);
-				if (!exists)
+				Service updated = await _serviceBLL.UpdateAsync(service, ct);
+				if (updated == null)
 				{
 					return new NotFoundResult();
 				}
+				return new OkObjectResult(updated);
 			}
 			catch (InvalidServiceException e)
 			{
 				return new BadRequestObjectResult(e.Message);
 			}
-			return new OkResult();
+			catch (OutdatedServiceException e)
+			{
+				return new ObjectResult(e.Latest)
+				{
+					StatusCode = (int)HttpStatusCode.PreconditionFailed
+				};
+			}
 		}
 
 		[FunctionName("Service-Delete")]
