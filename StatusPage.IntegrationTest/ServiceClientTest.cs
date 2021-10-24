@@ -1,6 +1,5 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
-using StatusPage.Api;
 using StatusPage.Client;
 using System;
 using System.IO;
@@ -18,7 +17,7 @@ namespace StatusPage.IntegrationTest
 		protected override IServiceProvider ServiceProvider => _ServiceProvider;
 
 		[ClassInitialize]
-		public static void Init(TestContext context)
+		public static void Init(TestContext _)
 		{
 			IServiceCollection services = new ServiceCollection();
 
@@ -33,10 +32,10 @@ namespace StatusPage.IntegrationTest
 		[ClassCleanup]
 		public static void Cleanup()
 		{
-			_Host.Dispose();
+			_Host?.Dispose();
 			_Host = null;
 
-			_ServiceProvider.Dispose();
+			_ServiceProvider?.Dispose();
 			_ServiceProvider = null;
 		}
 
