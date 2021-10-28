@@ -24,3 +24,7 @@ jobs:
         NUGET_SOURCE=https://nuget.pkg.github.com/${{ github.repository_owner }}/index.json
         SERVICE_REPOSITORY_URL=https://github.com/${{ github.repository }}
         bash -x build.sh
+    - name: docker login
+      run: docker login --username=${{ github.actor }} --password=${{ github.token }} ghcr.io
+    - name: docker push
+      run: docker push --quiet ${{ env.SERVICE_IMAGE_NAME }}:${{ env.SERVICE_VERSION }}

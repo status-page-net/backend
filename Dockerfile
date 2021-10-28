@@ -1,6 +1,6 @@
 # Build
 
-FROM mcr.microsoft.com/dotnet/sdk:3.1 AS build
+FROM mcr.microsoft.com/dotnet/sdk:3.1-alpine AS build
 
 ARG NUGET_API_KEY
 ARG NUGET_SOURCE
@@ -23,7 +23,9 @@ RUN \
 
 # Runtime
 
-# FROM mcr.microsoft.com/dotnet/aspnet:3.1
+FROM mcr.microsoft.com/dotnet/aspnet:3.1-alpine
 
-# COPY --from=build /opt/status-page-net/backend/out/ /opt/status-page-net/backend/
-# WORKDIR /opt/status-page-net/backend/
+COPY --from=build /opt/status-page-net/backend/StatusPage.Server/out/Release/ /opt/status-page-net/backend/
+WORKDIR /opt/status-page-net/backend/
+
+ENTRYPOINT [ "dotnet", "StatusPage.Server.dll" ]

@@ -19,7 +19,7 @@ namespace StatusPage.Client
 
 		public async Task<Service> CreateAsync(Service service, CancellationToken ct)
 		{
-			using HttpResponseMessage response = await _client.PostAsJsonAsync("api/services", service, ct);
+			using HttpResponseMessage response = await _client.PostAsJsonAsync("service", service, ct);
 			if (response.StatusCode == HttpStatusCode.BadRequest)
 			{
 				string message = await response.Content.ReadAsStringAsync();
@@ -35,7 +35,7 @@ namespace StatusPage.Client
 
 		public async Task<Service> GetAsync(Guid id, CancellationToken ct)
 		{
-			using HttpResponseMessage response = await _client.GetAsync($"api/services/{id}", ct);
+			using HttpResponseMessage response = await _client.GetAsync($"service?id={id}", ct);
 			if (response.StatusCode == HttpStatusCode.NotFound)
 			{
 				return null;
@@ -46,7 +46,7 @@ namespace StatusPage.Client
 
 		public async Task<Service> UpdateAsync(Service service, CancellationToken ct)
 		{
-			using HttpResponseMessage response = await _client.PutAsJsonAsync("api/services", service, ct);
+			using HttpResponseMessage response = await _client.PutAsJsonAsync("service", service, ct);
 			if (response.StatusCode == HttpStatusCode.BadRequest)
 			{
 				string message = await response.Content.ReadAsStringAsync();
@@ -67,7 +67,7 @@ namespace StatusPage.Client
 
 		public async Task<bool> DeleteAsync(Guid id, CancellationToken ct)
 		{
-			using HttpResponseMessage response = await _client.DeleteAsync($"api/services/{id}", ct);
+			using HttpResponseMessage response = await _client.DeleteAsync($"service?id={id}", ct);
 			if (response.StatusCode == HttpStatusCode.NotFound)
 			{
 				return false;

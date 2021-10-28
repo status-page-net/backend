@@ -20,8 +20,11 @@ namespace StatusPage.IntegrationTest
 		{
 			IServiceCollection services = new ServiceCollection();
 			services.AddStatusPageBLL();
-			MongoClientSettings settings = MongoClientSettings.FromConnectionString("mongodb://localhost:27017/");
-			services.AddStatusPageMongoDB(settings, _DBName);
+			services.AddStatusPageMongoDB(options =>
+			{
+				options.ConnectionString = "mongodb://localhost:27017/";
+				options.Name = _DBName;
+			});
 			_ServiceProvider = services.BuildServiceProvider();
 		}
 
