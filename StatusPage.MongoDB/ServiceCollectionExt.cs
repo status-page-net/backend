@@ -4,6 +4,7 @@ using Microsoft.Extensions.Options;
 using MongoDB.Driver;
 using StatusPage.Api;
 using System;
+using System.Threading;
 
 namespace StatusPage.MongoDB
 {
@@ -16,7 +17,12 @@ namespace StatusPage.MongoDB
 				Options options = sp.GetService<IOptions<Options>>().Value;
 				MongoClientSettings settings = MongoClientSettings.FromConnectionString(options.ConnectionString);
 				var client = new MongoClient(settings);
-				return client.GetDatabase(options.Name);
+				IMongoDatabase database = client.GetDatabase(options.Name);
+
+				var schema = new Schema(database);
+				schema.UpgradeAsync(CancellationToken.None).Wait();
+
+				return database;
 			});
 			services.AddSingleton<IServiceDAL, ServiceDAL>();
 		}

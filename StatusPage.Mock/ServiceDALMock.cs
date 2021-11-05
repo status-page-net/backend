@@ -1,6 +1,6 @@
 ﻿using StatusPage.Api;
 using System;
-using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -8,23 +8,36 @@ namespace StatusPage.Mock
 {
 	public class ServiceDALMock : IServiceDAL
 	{
-		private readonly ConcurrentDictionary<Guid, Service> _storage = new ConcurrentDictionary<Guid, Service>();
+		private readonly Dictionary<Guid, Service> _storage = new Dictionary<Guid, Service>();
+		private readonly Dictionary<string, Service> _title = new Dictionary<string, Service>();
 
 		public Task<Service> CreateAsync(Service service, CancellationToken ct)
 		{
 			Service.Validate(service);
 
 			Service clone = service.Clone(refreshETag: true);
-			if (!_storage.TryAdd(service.Id, clone))
+			lock (_storage)
 			{
-				throw new ServiceAlreadyExistsException(service.Id, null);
+				if (_title.ContainsKey(service.Title))
+				{
+					throw new ServiceAlreadyExistsException(service.Id, null);
+				}
+				if (!_storage.TryAdd(service.Id, clone))
+				{
+					throw new ServiceAlreadyExistsException(service.Id, null);
+				}
+				_title.Add(service.Title, clone);
 			}
 			return Task.FromResult(clone);
 		}
 
 		public Task<Service> GetAsync(Guid id, CancellationToken ct)
 		{
-			_storage.TryGetValue(id, out Service service);
+			Service service;
+			lock (_storage)
+			{
+				_storage.TryGetValue(id, out service);
+			}
 			return Task.FromResult(service?.Clone(refreshETag: false));
 		}
 
@@ -32,28 +45,45 @@ namespace StatusPage.Mock
 		{
 			Service.Validate(service);
 
-			bool exists = _storage.TryGetValue(service.Id, out Service current);
-			if (!exists)
+			lock (_storage)
 			{
-				return Task.FromResult<Service>(null);
+				bool exists = _storage.TryGetValue(service.Id, out Service current);
+				if (!exists)
+				{
+					return Task.FromResult<Service>(null);
+				}
+				if (service.ETag != current.ETag)
+				{
+					throw new OutdatedServiceException(current);
+				}
+
+				if (_title.TryGetValue(service.Title, out Service duplicate))
+				{
+					if (service.Id != duplicate.Id)
+					{
+						throw new ServiceAlreadyExistsException(service.Id, null);
+					}
+				}
+
+				Service clone = service.Clone(refreshETag: true);
+				_storage[service.Id] = clone;
+				_title[service.Title] = clone;
+				return Task.FromResult(clone);
 			}
-			if (service.ETag != current.ETag)
-			{
-				throw new OutdatedServiceException(current);
-			}
-			Service clone = service.Clone(refreshETag: true);
-			exists = _storage.TryUpdate(service.Id, clone, current);
-			if (!exists)
-			{
-				throw new OutdatedServiceException(current);
-			}
-			return Task.FromResult(clone);
 		}
 
 		public Task<bool> DeleteAsync(Guid id, CancellationToken ct)
 		{
-			bool exists = _storage.TryRemove(id, out _);
-			return Task.FromResult(exists);
+			lock (_storage)
+			{
+				bool exists = _storage.TryGetValue(id, out Service service);
+				if (exists)
+				{
+					_storage.Remove(service.Id);
+					_title.Remove(service.Title);
+				}
+				return Task.FromResult(exists);
+			}
 		}
 	}
 }

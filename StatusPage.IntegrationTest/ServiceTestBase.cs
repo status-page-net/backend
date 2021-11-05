@@ -50,6 +50,24 @@ namespace StatusPage.IntegrationTest
 		}
 
 		[TestMethod]
+		public async Task Create_Fail_UniqueTitle()
+		{
+			await RunAsync(async (serviceBLL, ct) =>
+			{
+				Service source1 = CreateDefaultService();
+				Service service = await serviceBLL.CreateAsync(source1, ct);
+
+				Service source2 = CreateDefaultService();
+				Assert.AreNotEqual(source1.Id, source2.Id);
+				source2.Title = source1.Title;
+
+				async Task action() => await serviceBLL.CreateAsync(source2, ct);
+
+				await Assert.ThrowsExceptionAsync<ServiceAlreadyExistsException>(action);
+			});
+		}
+
+		[TestMethod]
 		public async Task Get_Ok()
 		{
 			await RunAsync(async (serviceBLL, ct) =>
@@ -108,6 +126,25 @@ namespace StatusPage.IntegrationTest
 		}
 
 		[TestMethod]
+		public async Task Update_Fail_UniqueTitle()
+		{
+			await RunAsync(async (serviceBLL, ct) =>
+			{
+				Service source1 = CreateDefaultService();
+				Service service1 = await serviceBLL.CreateAsync(source1, ct);
+
+				Service source2 = CreateDefaultService();
+				Service service2 = await serviceBLL.CreateAsync(source2, ct);
+
+				service2.Title = service1.Title;
+
+				async Task action() => await serviceBLL.UpdateAsync(service2, ct);
+
+				await Assert.ThrowsExceptionAsync<ServiceAlreadyExistsException>(action);
+			});
+		}
+
+		[TestMethod]
 		public async Task Update_Fail_Outdated()
 		{
 			await RunAsync(async (serviceBLL, ct) =>
@@ -161,10 +198,11 @@ namespace StatusPage.IntegrationTest
 
 		private static Service CreateDefaultService()
 		{
+			Guid id = Guid.NewGuid();
 			return new Service
 			{
-				Id = Guid.NewGuid(),
-				Title = "Service.Default"
+				Id = id,
+				Title = $"Service-{id:N}"
 			};
 		}
 	}

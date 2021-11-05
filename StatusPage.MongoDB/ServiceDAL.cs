@@ -17,6 +17,8 @@ namespace StatusPage.MongoDB
 
 		private IMongoCollection<Service> Collection => _database.GetCollection<Service>(nameof(Service));
 
+		private const int DuplicateKey = 11000;
+
 		public async Task<Service> CreateAsync(Service service, CancellationToken ct)
 		{
 			Service.Validate(service);
@@ -26,7 +28,7 @@ namespace StatusPage.MongoDB
 			{
 				await Collection.InsertOneAsync(clone, null, ct);
 			}
-			catch (MongoWriteException e) when (e.WriteError.Category == ServerErrorCategory.DuplicateKey)
+			catch (MongoWriteException e) when (e.WriteError.Code == DuplicateKey)
 			{
 				throw new ServiceAlreadyExistsException(service.Id, e);
 			}
@@ -59,15 +61,23 @@ namespace StatusPage.MongoDB
 			Service.Validate(service);
 
 			Service clone = service.Clone(refreshETag: true);
-			Service before = await Collection.FindOneAndReplaceAsync<Service>(
-				s => (s.Id == service.Id) && (s.ETag == service.ETag),
-				clone,
-				new FindOneAndReplaceOptions<Service>
-				{
-					IsUpsert = false,
-					ReturnDocument = ReturnDocument.Before
-				},
-				ct);
+			Service before;
+			try
+			{
+				before = await Collection.FindOneAndReplaceAsync<Service>(
+					s => (s.Id == service.Id) && (s.ETag == service.ETag),
+					clone,
+					new FindOneAndReplaceOptions<Service>
+					{
+						IsUpsert = false,
+						ReturnDocument = ReturnDocument.Before
+					},
+					ct);
+			}
+			catch (MongoCommandException e) when (e.Code == DuplicateKey)
+			{
+				throw new ServiceAlreadyExistsException(service.Id, e);
+			}
 			if (before == null)
 			{
 				Service current = await GetAsync(service.Id, ct);
@@ -87,6 +97,19 @@ namespace StatusPage.MongoDB
 				null,
 				ct);
 			return (before != null);
+		}
+
+		public async Task UpgradeV1Async(CancellationToken ct)
+		{
+			await Collection.Indexes.CreateOneAsync(
+				new CreateIndexModel<Service>(
+					Builders<Service>.IndexKeys.Ascending(nameof(Service.Title)),
+					new CreateIndexOptions
+					{
+						Unique = true,
+					}),
+				null,
+				ct);
 		}
 	}
 }
