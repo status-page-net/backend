@@ -48,20 +48,23 @@ namespace StatusPage.Api
 			}
 			return clone;
 		}
+	}
 
+	public static class ServiceExt
+	{
 		/// <summary>
 		/// Validates the Service.
 		/// </summary>
-		/// <exception cref="InvalidServiceException" />
-		public static void Validate(Service service)
+		/// <exception cref="ApiArgumentException" />
+		public static void Validate(this Service service)
 		{
 			if (service == null)
 			{
-				throw new InvalidServiceException($"{nameof(Service)} is null.");
+				throw new ApiArgumentException(typeof(Service));
 			}
 			if (service.Title == null)
 			{
-				throw new InvalidServiceException($"{nameof(Title)} is null.");
+				throw new ApiArgumentException(typeof(Service), nameof(Service.Title));
 			}
 		}
 	}

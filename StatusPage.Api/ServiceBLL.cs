@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 namespace StatusPage.Api
 {
 	/// <summary>
-	/// Service Business Logic Layer interface.
+	/// Service Business Logic Layer (BLL) interface.
 	/// </summary>
 	public interface IServiceBLL
 	{
@@ -15,17 +15,19 @@ namespace StatusPage.Api
 		/// <param name="service"></param>
 		/// <param name="ct">Cancellation token for asynchronous operation.</param>
 		/// <returns>Instance of the service.</returns>
-		/// <exception cref="InvalidServiceException"></exception>
+		/// <exception cref="ApiArgumentException"></exception>
 		/// <exception cref="ServiceAlreadyExistsException"></exception>
 		Task<Service> CreateAsync(Service service, CancellationToken ct);
 
 		/// <summary>
-		/// Gets a service by identifier.
+		/// List services by filter and pager.
 		/// </summary>
-		/// <param name="id">Identifier of a service.</param>
+		/// <param name="filter">Filter.</param>
+		/// <param name="pager">Pager.</param>
 		/// <param name="ct">Cancellation token for asynchronous operation.</param>
-		/// <returns>Instance of the service or <see langword="null"/> if not exists.</returns>
-		Task<Service> GetAsync(Guid id, CancellationToken ct);
+		/// <returns>Array of services.</returns>
+		/// <exception cref="ApiArgumentException"></exception>
+		Task<Service[]> ListAsync(ServiceFilter filter, ServicePager pager, CancellationToken ct);
 
 		/// <summary>
 		/// Updates a service.
@@ -35,7 +37,7 @@ namespace StatusPage.Api
 		/// <returns>
 		/// Instance of the service if it was updated or <see langword="null"/> if not exists.
 		/// </returns>
-		/// <exception cref="InvalidServiceException"></exception>
+		/// <exception cref="ApiArgumentException"></exception>
 		/// <exception cref="OutdatedServiceException"></exception>
 		Task<Service> UpdateAsync(Service service, CancellationToken ct);
 
@@ -50,14 +52,24 @@ namespace StatusPage.Api
 		Task<bool> DeleteAsync(Guid id, CancellationToken ct);
 	}
 
-	/// <summary>
-	/// Service Data Access Layer interface.
-	/// </summary>
-	public interface IServiceDAL
+	public static class ServiceBLLExt
 	{
-		Task<Service> CreateAsync(Service service, CancellationToken ct);
-		Task<Service> GetAsync(Guid id, CancellationToken ct);
-		Task<Service> UpdateAsync(Service service, CancellationToken ct);
-		Task<bool> DeleteAsync(Guid id, CancellationToken ct);
+		public static async Task<Service> GetAsync(this IServiceBLL serviceBLL, Guid id, CancellationToken ct)
+		{
+			var filter = new ServiceFilter
+			{
+				Ids = new Guid[] { id }
+			};
+			var pager = new ServicePager
+			{
+				Limit = 1
+			};
+			Service[] list = await serviceBLL.ListAsync(filter, pager, ct);
+			if (list.Length == 0)
+			{
+				return null;
+			}
+			return list[0];
+		}
 	}
 }

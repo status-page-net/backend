@@ -16,19 +16,22 @@ namespace StatusPage.BLL
 
 		public async Task<Service> CreateAsync(Service service, CancellationToken ct)
 		{
-			Service.Validate(service);
+			service.Validate();
 
 			return await _serviceDAL.CreateAsync(service, ct);
 		}
 
-		public async Task<Service> GetAsync(Guid id, CancellationToken ct)
+		public async Task<Service[]> ListAsync(ServiceFilter filter, ServicePager pager, CancellationToken ct)
 		{
-			return await _serviceDAL.GetAsync(id, ct);
+			filter.Validate();
+			pager.Validate();
+
+			return await _serviceDAL.ListAsync(filter, pager, ct);
 		}
 
 		public async Task<Service> UpdateAsync(Service service, CancellationToken ct)
 		{
-			Service.Validate(service);
+			service.Validate();
 
 			return await _serviceDAL.UpdateAsync(service, ct);
 		}

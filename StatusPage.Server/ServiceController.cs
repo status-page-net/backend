@@ -26,7 +26,7 @@ namespace StatusPage.Server
 				Service created = await _serviceBLL.CreateAsync(service, ct);
 				return Ok(created);
 			}
-			catch (InvalidServiceException e)
+			catch (ApiArgumentException e)
 			{
 				return BadRequest(e.Message);
 			}
@@ -37,14 +37,20 @@ namespace StatusPage.Server
 		}
 
 		[HttpGet]
-		public async Task<ActionResult<Service>> GetAsync([FromQuery] Guid id, CancellationToken ct)
+		public async Task<ActionResult<Service[]>> ListAsync(
+			[FromQuery] ServiceFilter filter,
+			[FromQuery] ServicePager pager,
+			CancellationToken ct)
 		{
-			Service service = await _serviceBLL.GetAsync(id, ct);
-			if (service == null)
+			try
 			{
-				return NotFound();
+				Service[] list = await _serviceBLL.ListAsync(filter, pager, ct);
+				return Ok(list);
 			}
-			return Ok(service);
+			catch (ApiArgumentException e)
+			{
+				return BadRequest(e.Message);
+			}
 		}
 
 		[HttpPut]
@@ -59,7 +65,7 @@ namespace StatusPage.Server
 				}
 				return Ok(updated);
 			}
-			catch (InvalidServiceException e)
+			catch (ApiArgumentException e)
 			{
 				return BadRequest(e.Message);
 			}

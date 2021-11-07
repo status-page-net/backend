@@ -1,6 +1,5 @@
 ﻿using MongoDB.Driver;
 using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -30,7 +29,7 @@ namespace StatusPage.MongoDB
 		public async Task<Version> GetLastAsync(CancellationToken ct)
 		{
 			using IAsyncCursor<Version> cursor = await Collection.FindAsync(
-				version => true,
+				Builders<Version>.Filter.Empty,
 				new FindOptions<Version, Version>
 				{
 					Limit = 1,

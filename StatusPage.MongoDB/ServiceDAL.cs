@@ -1,6 +1,7 @@
 ﻿using MongoDB.Driver;
 using StatusPage.Api;
 using System;
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -21,7 +22,7 @@ namespace StatusPage.MongoDB
 
 		public async Task<Service> CreateAsync(Service service, CancellationToken ct)
 		{
-			Service.Validate(service);
+			service.Validate();
 
 			Service clone = service.Clone(refreshETag: true);
 			try
@@ -35,30 +36,26 @@ namespace StatusPage.MongoDB
 			return clone;
 		}
 
-		public async Task<Service> GetAsync(Guid id, CancellationToken ct)
+		public async Task<Service[]> ListAsync(ServiceFilter filter, ServicePager pager, CancellationToken ct)
 		{
 			using IAsyncCursor<Service> cursor = await Collection.FindAsync(
-				service => service.Id == id,
-				new FindOptions<Service, Service>
-				{
-					Limit = 1
-				},
+				ToFilterDefinition(filter),
+				ToFindOptions(pager),
 				ct);
-			bool exists = await cursor.MoveNextAsync(ct);
-			if (!exists)
+			var list = new List<Service>();
+			while (await cursor.MoveNextAsync(ct))
 			{
-				return null;
+				foreach (Service service in cursor.Current)
+				{
+					list.Add(service);
+				}
 			}
-			foreach (Service service in cursor.Current)
-			{
-				return service;
-			}
-			return null;
+			return list.ToArray();
 		}
 
 		public async Task<Service> UpdateAsync(Service service, CancellationToken ct)
 		{
-			Service.Validate(service);
+			service.Validate();
 
 			Service clone = service.Clone(refreshETag: true);
 			Service before;
@@ -80,7 +77,7 @@ namespace StatusPage.MongoDB
 			}
 			if (before == null)
 			{
-				Service current = await GetAsync(service.Id, ct);
+				Service current = await this.GetAsync(service.Id, ct);
 				if (current == null)
 				{
 					return null;
@@ -97,6 +94,34 @@ namespace StatusPage.MongoDB
 				null,
 				ct);
 			return (before != null);
+		}
+
+		private static FilterDefinition<Service> ToFilterDefinition(ServiceFilter filter)
+		{
+			FilterDefinitionBuilder<Service> builder = Builders<Service>.Filter;
+			var list = new List<FilterDefinition<Service>>();
+			if (filter.Ids != null)
+			{
+				list.Add(builder.In(nameof(Service.Id), filter.Ids));
+			}
+			if (list.Count == 0)
+			{
+				return builder.Empty;
+			}
+			if (list.Count == 1)
+			{
+				return list[0];
+			}
+			return builder.And(list);
+		}
+
+		private static FindOptions<Service, Service> ToFindOptions(ServicePager pager)
+		{
+			return new FindOptions<Service, Service>
+			{
+				Limit = pager.Limit,
+				Skip = pager.Offset
+			};
 		}
 
 		public async Task UpgradeV1Async(CancellationToken ct)

@@ -11,6 +11,7 @@ namespace StatusPage.IntegrationTest
 	{
 		private static ServiceProvider _ServiceProvider;
 		private static ServerMock _Server;
+		private static HttpClient _Client;
 
 		protected override IServiceProvider ServiceProvider => _ServiceProvider;
 
@@ -20,8 +21,8 @@ namespace StatusPage.IntegrationTest
 			IServiceCollection services = new ServiceCollection();
 
 			_Server = new ServerMock();
-			HttpClient client = _Server.CreateClient();
-			services.AddServiceClient(client);
+			_Client = _Server.CreateClient();
+			services.AddServiceClient(_Client);
 
 			_ServiceProvider = services.BuildServiceProvider();
 		}
@@ -29,6 +30,8 @@ namespace StatusPage.IntegrationTest
 		[ClassCleanup]
 		public static void Cleanup()
 		{
+			_Client = null;
+
 			_Server?.Dispose();
 			_Server = null;
 

@@ -2,10 +2,20 @@
 
 namespace StatusPage.Api
 {
-	public class InvalidServiceException : ArgumentException
+	public class ApiArgumentException : Exception
 	{
-		public InvalidServiceException(string message) :
-			base(message, (Exception)null)
+		public ApiArgumentException(Type type) :
+			base($"Bad argument {type.Name}")
+		{
+		}
+
+		public ApiArgumentException(Type type, string field) :
+			base($"Bad argument {type.Name}.{field}")
+		{
+		}
+
+		public ApiArgumentException(string message) :
+			base(message)
 		{
 		}
 	}

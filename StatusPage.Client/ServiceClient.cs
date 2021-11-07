@@ -1,8 +1,11 @@
 ﻿using StatusPage.Api;
 using System;
+using System.Collections;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
+using System.Reflection;
+using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -23,7 +26,7 @@ namespace StatusPage.Client
 			if (response.StatusCode == HttpStatusCode.BadRequest)
 			{
 				string message = await response.Content.ReadAsStringAsync();
-				throw new InvalidServiceException(message);
+				throw new ApiArgumentException(message);
 			}
 			if (response.StatusCode == HttpStatusCode.Conflict)
 			{
@@ -33,15 +36,25 @@ namespace StatusPage.Client
 			return await response.Content.ReadFromJsonAsync<Service>(null, ct);
 		}
 
-		public async Task<Service> GetAsync(Guid id, CancellationToken ct)
+		public async Task<Service[]> ListAsync(ServiceFilter filter, ServicePager pager, CancellationToken ct)
 		{
-			using HttpResponseMessage response = await _client.GetAsync($"service?id={id}", ct);
-			if (response.StatusCode == HttpStatusCode.NotFound)
+			filter.Validate();
+			pager.Validate();
+
+			var qsb = new QueryStringBuilder();
+			qsb.Append(nameof(filter), filter);
+			qsb.Append(nameof(pager), pager);
+
+			using HttpResponseMessage response = await _client.GetAsync(
+				$"service{qsb}",
+				ct);
+			if (response.StatusCode == HttpStatusCode.BadRequest)
 			{
-				return null;
+				string message = await response.Content.ReadAsStringAsync();
+				throw new ApiArgumentException(message);
 			}
 			response.EnsureSuccessStatusCode();
-			return await response.Content.ReadFromJsonAsync<Service>(null, ct);
+			return await response.Content.ReadFromJsonAsync<Service[]>(null, ct);
 		}
 
 		public async Task<Service> UpdateAsync(Service service, CancellationToken ct)
@@ -50,7 +63,7 @@ namespace StatusPage.Client
 			if (response.StatusCode == HttpStatusCode.BadRequest)
 			{
 				string message = await response.Content.ReadAsStringAsync();
-				throw new InvalidServiceException(message);
+				throw new ApiArgumentException(message);
 			}
 			if (response.StatusCode == HttpStatusCode.NotFound)
 			{

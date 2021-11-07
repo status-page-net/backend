@@ -2,6 +2,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
 using StatusPage.Api;
 using System;
+using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -64,6 +65,32 @@ namespace StatusPage.IntegrationTest
 				async Task action() => await serviceBLL.CreateAsync(source2, ct);
 
 				await Assert.ThrowsExceptionAsync<ServiceAlreadyExistsException>(action);
+			});
+		}
+
+		[TestMethod]
+		public async Task List_Ok()
+		{
+			await RunAsync(async (serviceBLL, ct) =>
+			{
+				Service service1 = await serviceBLL.CreateAsync(CreateDefaultService(), ct);
+				Service service2 = await serviceBLL.CreateAsync(CreateDefaultService(), ct);
+				Service service3 = await serviceBLL.CreateAsync(CreateDefaultService(), ct);
+
+				Service[] list = await serviceBLL.ListAsync(
+					new ServiceFilter
+					{
+						Ids = new Guid[] { service1.Id, service2.Id }
+					},
+					new ServicePager
+					{
+						Limit = ServicePager.MaxLimit
+					},
+					ct);
+				Assert.AreEqual(list.Length, 2);
+
+				Assert.IsTrue(list.Contains(service1));
+				Assert.IsTrue(list.Contains(service2));
 			});
 		}
 
