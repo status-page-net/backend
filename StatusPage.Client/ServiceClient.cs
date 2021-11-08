@@ -1,11 +1,9 @@
 ﻿using StatusPage.Api;
 using System;
-using System.Collections;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
-using System.Reflection;
-using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 
@@ -20,6 +18,8 @@ namespace StatusPage.Client
 			_client = client ?? throw new ArgumentNullException(nameof(client));
 		}
 
+		private JsonSerializerOptions JsonSerializerOptions { get; } = null;
+
 		public async Task<Service> CreateAsync(Service service, CancellationToken ct)
 		{
 			using HttpResponseMessage response = await _client.PostAsJsonAsync("service", service, ct);
@@ -33,7 +33,7 @@ namespace StatusPage.Client
 				throw new ServiceAlreadyExistsException(service.Id, null);
 			}
 			response.EnsureSuccessStatusCode();
-			return await response.Content.ReadFromJsonAsync<Service>(null, ct);
+			return await response.Content.ReadFromJsonAsync<Service>(JsonSerializerOptions, ct);
 		}
 
 		public async Task<Service[]> ListAsync(ServiceFilter filter, ServicePager pager, CancellationToken ct)
@@ -54,7 +54,7 @@ namespace StatusPage.Client
 				throw new ApiArgumentException(message);
 			}
 			response.EnsureSuccessStatusCode();
-			return await response.Content.ReadFromJsonAsync<Service[]>(null, ct);
+			return await response.Content.ReadFromJsonAsync<Service[]>(JsonSerializerOptions, ct);
 		}
 
 		public async Task<Service> UpdateAsync(Service service, CancellationToken ct)
@@ -71,11 +71,11 @@ namespace StatusPage.Client
 			}
 			if (response.StatusCode == HttpStatusCode.PreconditionFailed)
 			{
-				Service latest = await response.Content.ReadFromJsonAsync<Service>(null, ct);
+				Service latest = await response.Content.ReadFromJsonAsync<Service>(JsonSerializerOptions, ct);
 				throw new OutdatedServiceException(latest);
 			}
 			response.EnsureSuccessStatusCode();
-			return await response.Content.ReadFromJsonAsync<Service>(null, ct);
+			return await response.Content.ReadFromJsonAsync<Service>(JsonSerializerOptions, ct);
 		}
 
 		public async Task<bool> DeleteAsync(Guid id, CancellationToken ct)

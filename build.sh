@@ -19,8 +19,8 @@ docker run \
 # docker build
 
 # Separate quiet pull for clean build logs.
-docker pull --quiet mcr.microsoft.com/dotnet/aspnet:3.1-alpine
-docker pull --quiet mcr.microsoft.com/dotnet/sdk:3.1-alpine
+docker pull --quiet mcr.microsoft.com/dotnet/aspnet:6.0-alpine
+docker pull --quiet mcr.microsoft.com/dotnet/sdk:6.0-alpine
 
 docker build \
 	--progress=plain \

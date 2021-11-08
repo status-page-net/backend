@@ -42,7 +42,7 @@ namespace StatusPage.Server
 				builder.ClearProviders();
 				builder.AddConfiguration(
 					_configuration.GetSection("Logging"));
-				builder.AddConsole();
+				builder.AddJsonConsole();
 			});
 
 			services.AddControllers();
