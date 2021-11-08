@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using MongoDB.Driver;
+using Microsoft.Extensions.Logging;
 using StatusPage.BLL;
 using StatusPage.MongoDB;
 
@@ -37,6 +37,14 @@ namespace StatusPage.Server
 
 		public void ConfigureServices(IServiceCollection services)
 		{
+			services.AddLogging((ILoggingBuilder builder) =>
+			{
+				builder.ClearProviders();
+				builder.AddConfiguration(
+					_configuration.GetSection("Logging"));
+				builder.AddConsole();
+			});
+
 			services.AddControllers();
 
 			services.AddStatusPageBLL();
